@@ -48,10 +48,11 @@ def one_hot_buckets(a, low, high, n, eps=1e-6):
     First category absorbs anything below low
     Last category absorbs anything above high
     '''
-    step = (high-low) / n
-    bins = torch.linspace(low+step, high-step, n-1)
-    cat = torch.bucketize(a, bins).long()
-    return F.one_hot(cat, num_classes=n)
+    a = a.float()
+    buckets = torch.linspace(low, high+eps, n+1)
+    bucket_idx = torch.searchsorted(buckets, a) - 1
+    bucket_idx = torch.clamp(bucket_idx, 0, n-1)
+    return F.one_hot(bucket_idx, n)
 
 def init_radius_of_gyration(indep, feature_conf, feature_inference_conf, **kwargs):
     """
